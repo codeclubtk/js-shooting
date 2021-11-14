@@ -872,6 +872,8 @@ function fire3way() {
 }
 ```
 
+![3way](./images/3way.png)
+
 -----
 
 ## Step 14: Xキーでレーザーを発射できるようにしよう
@@ -919,6 +921,8 @@ function hitTest() {
           j -= 1;
         }
 ```
+
+![laser](./images/laser.png)
 
 -----
 
