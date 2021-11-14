@@ -32,6 +32,7 @@ function setUp() {
     let right = keyboard("ArrowRight");
     let space = keyboard(" ");
     let z_key = keyboard("z");
+    let x_key = keyboard("x");
 
     left.press = () => {
         player.vx = -4;
@@ -56,6 +57,10 @@ function setUp() {
     z_key.press = () => {
         console.info("3-way!");
         fire3way();
+    };
+    x_key.press = () => {
+        console.info("laser!");
+        fireLaser();
     };
 
     resetGame();
@@ -136,9 +141,11 @@ function hitTest() {
                 aliens.splice(i, 1);
                 removeSprite(alien);
                 i -= 1;
-                missiles.splice(j, 1);
-                removeSprite(missile);
-                j -= 1;
+                if (missile.kind === "missile") {
+                    missiles.splice(j, 1);
+                    removeSprite(missile);
+                    j -= 1;
+                }
                 //　このalienは削除されたので、breakしてjのループを抜ける
                 break;
             }
@@ -238,6 +245,18 @@ function fire3way() {
         missile.y = player.y - player.height / 2;
         missile.vy = -4;
         missile.vx = i;
+        missiles.push(missile);
+    }
+}
+
+function fireLaser() {
+    if (missiles.length < 3) {
+        let missile = createSprite(sprites.laser);
+        missile.x = player.x;
+        missile.y = player.y - player.height / 2;
+        missile.vy = -4;
+        missile.vx = 0;
+        missile.kind = "laser";
         missiles.push(missile);
     }
 }

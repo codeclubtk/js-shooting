@@ -831,11 +831,9 @@ function hitTest() {
         aliens.splice(i, 1);
         removeSprite(alien);
         i -= 1;
-        if (missile.kind === "missile") {
-          missiles.splice(j, 1);
-          removeSprite(missile);
-          j -= 1;
-        }
+        missiles.splice(j, 1);
+        removeSprite(missile);
+        j -= 1;
         //　このalienは削除されたので、breakしてjのループを抜ける
         break;
       }
@@ -869,7 +867,6 @@ function fire3way() {
     missile.y = player.y - player.height / 2;
     missile.vy = -4;
     missile.vx = i;
-    missile.kind = "missile";
     missiles.push(missile);
   }
 }
@@ -879,7 +876,48 @@ function fire3way() {
 
 ## Step 14: Xキーでレーザーを発射できるようにしよう
 
+- まず今までのStepで作成した`fire`と`fire3way1`に`missile.kind`を追加します
+
 ```js
+    missile.kind = "missile";
+```
+
+- そして、`fireLaser`にはmissile.kindを"laser"にします
+- これによりエイリアンとミサイルの当たり判定の時にLaserはミサイルを消去しないようにできます
+
+```js
+function fireLaser() {
+  if (missiles.length < 3) {
+      let missile = createSprite(sprites.laser);
+      missile.x = player.x;
+      missile.y = player.y - player.height / 2;
+      missile.vy = -4;
+      missile.vx = 0;
+      missile.kind = "laser";
+      missiles.push(missile);
+  }
+}
+
+function setUp() {
+  // ...省略
+  let x_key = keyboard("x");
+  x_key.press = () => {
+    console.info("laser!");
+    fireLaser();
+  };
+```
+
+- そして、missile.kindが"missile"の時だけミサイルを消滅させるようにします
+
+```js
+function hitTest() {
+  // ミサイルとエイリアンのあたり判定
+  // ... 省略
+        if (missile.kind === "missile") {
+          missiles.splice(j, 1);
+          removeSprite(missile);
+          j -= 1;
+        }
 ```
 
 -----
