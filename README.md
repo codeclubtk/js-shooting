@@ -1,17 +1,18 @@
-#  Javascript シューティングゲーム
+# Javascript シューティングゲーム
 
 ## 目次
+
 - [Javascript シューティングゲーム](#javascript-シューティングゲーム)
   - [目次](#目次)
   - [この教材について](#この教材について)
   - [手順](#手順)
     - [Step 00: CodeSandboxアカウントの登録](#step-00-codesandboxアカウントの登録)
     - [Step 01: Java Script と PIXI.jsの始まり](#step-01-java-script-と-pixijsの始まり)
-      - [課題](#課題)
+      - [課題 01](#課題-01)
     - [Step 02: キャラクターを表示してみよう](#step-02-キャラクターを表示してみよう)
-      - [課題](#課題-1)
+      - [課題 02](#課題-02)
     - [Step 03: Java Scriptについて](#step-03-java-scriptについて)
-      - [課題](#課題-2)
+      - [課題 03](#課題-03)
     - [Step 04: 自機を表示しよう](#step-04-自機を表示しよう)
     - [Step 05: 矢印キーで自機を移動しよう](#step-05-矢印キーで自機を移動しよう)
     - [Step 06: 自機の移動範囲を制限して画面から出ないようにしよう](#step-06-自機の移動範囲を制限して画面から出ないようにしよう)
@@ -25,10 +26,11 @@
     - [Step 14: Zキーで3-wayミサイルを発射できるようにしよう](#step-14-zキーで3-wayミサイルを発射できるようにしよう)
     - [Step 15: Xキーでレーザーを発射できるようにしよう](#step-15-xキーでレーザーを発射できるようにしよう)
   - [さらに改良するには？](#さらに改良するには)
+
 ## この教材について
 
-* これは「シューティングゲーム」の作り方を通してJava ScriptとPIXI.jsを学ぶための教材です
-* この教材では[このCodeSandboxの教材](https://codesandbox.io/s/shooting-game-ijvy1)を使用します
+- これは「シューティングゲーム」の作り方を通してJava ScriptとPIXI.jsを学ぶための教材です
+- この教材では[このCodeSandboxの教材](https://codesandbox.io/s/shooting-game-ijvy1)を使用します
 
 ## 手順
 
@@ -77,13 +79,14 @@ document.body.appendChild(app.view);
 ```
 
 - セーブするとブラウザの右側に黒い四角い背景が現れます
+- セーブ後ブラウザの右側が再表示されない場合は、右上の再読み込みボタン![再読み込みボタン](./images/step01-2.png)を押してください
 - これがこれから作成するゲーム画面になります
 - この段階では、`import`や`let`, `if`, `PIXI.utils...`などは気にしないでください
 - 以降のステップで必要な部分は解説します
 
-![図01-1](./images/step01-1.png)
+![step01画面](./images/step01-1.png)
 
-#### 課題
+#### 課題 01
 
 - 背景のサイズは320 x 240になっています。これを400 x 300にするとどうなるか確認してみよう
 - 背景の色が0x000000で黒になっています。これはRGBのR(赤）が00, G(緑)が00, B(青)が00、全て0なので黒という意味です。これを赤にするにはどうすればいいでしょう？
@@ -95,36 +98,206 @@ document.body.appendChild(app.view);
 
 ### Step 02: キャラクターを表示してみよう
 
-- Spriteを1つ表示してみよう
+- `images/alien1.png1`を表示してみよう
+- step01で作成した`index.js`の一番最後に、下のスクリプトを追加しよう
+- `//`以降はコメント行で、自由なコメント（自分のメモ）を記述できます
+- `loader`はPIXI.jsでスプライト用の画像を読み込むときに使用されます
+- `loader.add`で読み込む画像を全て登録後、`loader.load`で読み込んで変数に追加します
+- ここではspritesという辞書を用意し、`sprites.alien1`という辞書のアイテムに読み込んだスプライトを設定しています。辞書についてはStep 03で扱います
+- 最後に、`app.stage.addChild`にて、作成したスプライトをステージ（画面）に追加します
 
-#### 課題
+```js
+// 定数
+const loader = PIXI.Loader.shared;
+const sprites = {};
+
+// spriteの読み込み
+loader.add("alien1", "./images/alien1.png", { crossOrigin: "anonymous" });
+loader.load((loader, resources) => {
+  sprites.alien1 = new PIXI.Sprite(resources.alien1.texture);
+  app.stage.addChild(sprites.alien1);
+});
+```
+
+- うまく行くとalien1が表示されます
+
+![エイリアン1](./images/step02-1.png)
+
+#### 課題 02
 
 - Spriteを回転させてみよう
+  - ヒント: `sprites.alien1.rotation`
 - Spriteの位置を変えてみよう
+  - ヒント: `sprites.alien1.position.x`
 - 複数のSpriteを表示してみよう
-- 背景を白にしてみよう
+  - ヒント: `sprites.alien1=...`を参考に
+- より詳しいPIXI.jsの情報は<https://pixijs.io/guides/basics/getting-started.html>にあります
+- 日本語では、<https://github.com/wowowo142/c96>が参考になります
 
 ### Step 03: Java Scriptについて
 
-- 変数と型
-- console.logの使い方
+- Step 03では、Step 04以降ゲームを作っていく上で必要なJavascriptの基本について学びます
+- `index.js`を全て消去し、以下のように`console.log`を追加して実行してみよう
+
+  ```js
+  // Step 03
+  console.log("hello");
+  ```
+
+- `Console`ウィンドウを開くと`hello`と表示されたのがわかります
+
+![Console](./images/step03-1.png)
+
+- 変数とは
+  - 変数`x`の作成と代入
+  - `x = 3`の`=`は、右にある数字の3を左にある変数`x`に「代入する（設定する）」という意味です
+
+    ```js
+    let x = 3;
+    console.log(x);
+    ```
+
+  - 作成した変数`x`に1を足す
+  - `x = 3`の`=`は、右にある数字の3を左にある変数`x`に「代入する（設定する）」という意味です
+
+    ```js
+    x = x + 1;
+    console.log(x);
+    ```
+
+  - 変数同時は演算することもできます
+
+    ```js
+    let a = 10;
+    let b = 2;
+    let c = a + b;
+    console.log(c);
+    ```
+
+  - 整数だけでなく、少数や文字列も変数に代入できます
+
+  ```js
+  let d = 123.45;
+  let s = "hello";
+  console.log(d);
+  console.log(s);
+  ```
+
+  - 文字列と少数又は整数を`+`すると、文字列として連結されます
+
+  ```js
+  console.log(d+s);
+  ```
+
 - `if`構文とは？
+
+  ```js
+  let x1 = 3;
+  let x2 = 4;
+
+  /// === では、左辺と右辺が同じならTrueになります
+  if (x1 === 3) {
+    console.log("x1 is 3");
+  } else {
+    console.log("x1 is not 3");
+  }
+
+  if (x2 === 3) {
+    console.log("x2 is 3");
+  } else {
+    console.log("x2 is not 3");
+  }
+  ```
+
+- `==`（肩が違っても同じ値ならTrue)と`===`（型も同じでなくてはならない）
+
+  ```js
+  let x3 = 3;
+  let s3 = "3";
+  if (x3 == s3) {
+    console.log("==");
+  } else {
+    console.log("not ==");
+  }
+  if (x3 === s3) {
+    console.log("===");
+  } else {
+    console.log("not ===");
+  }
+  ```
+
 - `for`構文とは？
+  - `for` 基本型
+
+  ```js
+  for (let x4 = 1; x4 <= 3; x4 = x4 + 1) {
+    console.log("x4=" + x4);
+  }
+  ```
+
+  - `++`のようにも書けます
+
+  ```js
+  for (let x4 = 1; x4 <= 3; x4++) {
+    console.log("x4=" + x4);
+  }
+  ```
+
 - `array`（配列）とはなんだろう？
-  - `array`を使って複数の文字列を格納してみよう
-  - `for`を使ってlistの中身を全て表示してみよう
+  - `array`を使って複数の整数を格納してみよう
   - index（インデックス）を使ってarrayの中身を表示してみよう
+  - `for`を使ってarrayの中身を全て表示してみよう
   - index（インデックス）を使ってarrayの中身を変更してみよう
+
+  ```js
+  let a1 = [3, 5, 9];
+  console.log(a1[0]);
+  console.log(a1[1]);
+  console.log(a1[2]);
+
+  for (let i = 0; i <= 2; i++) {
+    console.log("a1[" + i + "]=" + a1[i]);
+  }
+
+  a1[1] = 100;
+
+  for (let i = 0; i <= 2; i++) {
+    console.log("a1[" + i + "]=" + a1[i]);
+  }
+  ```
+
 - `dictionary`（辞書とはなんだろう）？
   - `dictionary`を使って複数の文字列を格納してみよう
-  - `for`を使ってdictionaryの中身を全て表示してみよう
   - key（キー）を使ってdictionaryの中身を表示してみよう
   - key（キー）を使ってdictionaryの中身を変更してみよう
+  - `for`を使ってdictionaryの中身を全て表示してみよう
 
-#### 課題
+  ```js
+  let d1 = { apple: 3, orange: 5 };
+  console.log(d1);
+  console.log(d1["apple"]);
+  console.log(d1["orange"]);
 
-- `array`を作って、`for`を使ってそのarrayに1から100までの整数を格納してみよう
-- 1から100まで格納したarrayを列挙（巡回）して、全ての数字を表示してみよう
+  d1["apple"] = 100;
+  console.log(d1["apple"]);
+
+  for (let [k, v] of Object.entries(d1)) {
+    console.log("k="+k+", v="+v);
+  }
+  ```
+
+#### 課題 03
+
+- `a1`という変数名のarrayを作って、`for`を使ってそのarrayに1から100までの整数を格納してみよう
+
+  ```js
+  a1 = []
+  for(let i=0;i<100;i++){
+    a1[i] = i;
+  }
+  ```
+
+- 1から100まで格納した上記`a1`を列挙（巡回）して、全ての数字を表示してみよう
 - `dictionary`にいくつかのkey - valueペアを代入しよう
 - その`dictionary`を列挙（巡回）して、全てのkey - valueペアを`console.log`してみよう
 
@@ -144,15 +317,12 @@ document.body.appendChild(app.view);
 function setup() {
     // 自機のセットアップ
     player = createSprite(sprites.player);
-    player.x = 320;
-    player.y = 440;
+    player.x = 160;
+    player.y = 220;
 }
 ```
 
-- 画面サイズは幅640、高さ480にしよう
-- 自機の初期表示位置は(320,400)にしよう
-
-<!-- ![スクリーンショット](./docs/step04.png) -->
+- 自機の初期表示位置は(160,20)にしよう
 
 ### Step 05: 矢印キーで自機を移動しよう
 
@@ -179,8 +349,6 @@ function setup() {
 - ミサイルが画面にないときはまたミサイルが発射でき、ミサイルが画面内にあるときは発射できないようにしよう
 - ミサイルが発射されたら`missile`の位置を自機の位置あたりに設定し、`gameloop`内で位置を更新しよう
 - ミサイルは画面の外に出たら消えるようにしよう
-
-<!-- ![スクリーンショット](./docs/step08.png) -->
 
 ### Step 08: エイリアン（敵）を配置しよう
 
