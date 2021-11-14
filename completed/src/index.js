@@ -27,12 +27,15 @@ init(setup, gameloop);
 // ここでキーボード入力受付の処理を登録します
 // 自機やエイリアンのセットアップも行います
 function setup() {
+    // 自機のセットアップ
+    player = createSprite(sprites.player);
+
     // キーボード入力受付
-    let left = keyboard("ArrowLeft"),
-        right = keyboard("ArrowRight"),
-        space = keyboard(" "),
-        z_key = keyboard("z"),
-        x_key = keyboard("x");
+    let left = keyboard("ArrowLeft");
+    let right = keyboard("ArrowRight");
+    let space = keyboard(" ");
+    let z_key = keyboard("z");
+    let x_key = keyboard("x");
 
     left.press = () => {
         player.vx = -4;
@@ -62,9 +65,6 @@ function setup() {
             player.vx = 0;
         }
     };
-
-    // 自機のセットアップ
-    player = createSprite(sprites.player);
 
     reset_game();
 }

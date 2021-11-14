@@ -341,6 +341,8 @@ function setup() {
   - イベントが発生したら`player.vx`プロパティ（辞書のアイテム）を+4または-4に設定します
 - 1秒に60回呼ばれる`gameloop`にて、
   - プレイヤーの横座標を示す`player.x`に`player.vx`を足します
+  - `vx`はx方向のvelocity（加速度）という意味です
+- `player`は`setup`関数で初期化されますが、`gameloop`関数でも使えなくてはなりません。そのため、`let global;`を一番外側において、どの関数でも使えるグローバル変数にします
 
 ```js
 import "./styles.css";
@@ -407,23 +409,87 @@ right.release = () => {
 - 自機が画面から出ないように、以下の処理を追加しよう
   - 自機が画面の左端よりも左に来たら、左端に戻す
   - 自機が画面の右端よりも右に来たら、右端に戻す
-- 上記を行うには、以下のように書くことができます
+- 画面のサイズは、`app`をimportすることにより取得できます
+
+  ```js
+  import { app, init, keyboard, sprites, createSprite } from "./util.js";
+  console.log(app.view.width); // 320です
+  ```
+
+- 上記を行うには、`gameloop`内に以下のように書くことができます
   - `Math.max`を使って自機のX座標を現在の値と画面の左端のうち大きい方にする
   - `Math.min`を使って自機のX座標を現在の値と画面の右端のうち小さい方にする
+- 境界チェックのためのこの`Math.max/min`の使い方はよくでてきますので覚えておきましょう
 
-```js
-    player.x = Math.max(player.x, player.width / 2);
-    player.x = Math.min(player.x, app.view.width - sprites.player.width / 2);
-```
+  ```js
+      player.x = Math.max(player.x, player.width / 2);
+      player.x = Math.min(player.x, app.view.width - sprites.player.width / 2);
+  ```
 
 -----
 
 ## Step 07: ミサイルを発射しよう
 
-- スペースキーでミサイルを1発だけ発射できるようにしよう
-- ミサイルが画面にないときはまたミサイルが発射でき、ミサイルが画面内にあるときは発射できないようにしよう
-- ミサイルが発射されたら`missile`の位置を自機の位置あたりに設定し、`gameloop`内で位置を更新しよう
-- ミサイルは画面の外に出たら消えるようにしよう
+- ここまでで自機が移動できるようになりましたので、次にスペースキーでミサイルを1発だけ発射できるようにしよう
+  - ミサイルが画面にないときはまたミサイルが発射でき、ミサイルが画面内にあるときは発射できないようにしよう
+  - ミサイルが発射されたら`missile`の位置を自機の位置あたりに設定し、`gameloop`内で位置を更新しよう
+  - ミサイルは画面の外に出たら消えるようにしよう
+- まず、ミサイルを保存するグローバル変数`missile`を作成し、`null`に初期化します。`null`は何もない値という意味です
+
+```js
+let missile = null;
+```
+
+- そして、`setup`にスペースキーの処理を追加します。仕組みは`player`の動かし方と同じです
+- 今回、ミサイル発射時の処理は`player`の時よりちょっと長いため、`fire`という関数にします
+```js
+let space = keyboard(" ");
+space.press = () => {
+  console.log("fire!");
+  fire();
+};
+```
+
+- `fire`関数で、`missile`がnullの時だけミサイルを作成し、初期位置を設定します。こうすることにより、ミサイルが何発も同時に発射っされることを防ぎます
+
+```js
+function fire() {
+  if (missile === null) {
+    missile = createSprite(sprites.missile);
+    missile.x = player.x;
+    missile.y = player.y - player.height / 2;
+    missile.vy = -4;
+    missile.vx = 0;
+  }
+}
+```
+
+- 最後に、`gamelooop`でミサイルを動かします
+- また、ミサイルが画面外に出たらミサイルを`removeSripte`で削除し、nullに初期化します
+
+```js
+import {
+  // ... 省略
+  removeSprite
+} from "./util.js";
+
+function gameloop() {
+  // ... 省略
+
+  // ミサイルを動かす
+  if (missile !== null) {
+    missile.y += missile.vy;
+    missile.x += missile.vx;
+    // ミサイルが画面外に出たら削除し、nullに初期化
+    if (missile.y < 0) {
+      removeSprite(missile);
+      missile = null;
+    }
+  }
+}
+```
+
+- 詳細は`step07.js`を参照してください
 
 -----
 
