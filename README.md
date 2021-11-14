@@ -789,13 +789,98 @@ function gameLoop() {
 
 - 配列を使用してミサイルを画面内3発まで発射できるようにしよう
 
+```js
+let missiles = [];
+
+function gameLoop(){
+    // ...省略
+    // ミサイルを動かす
+    for (let i = 0; i < missiles.length; i++) {
+        let missile = missiles[i];
+        missile.y += missile.vy;
+        missile.x += missile.vx;
+        if (missile.y < -missile.height) {
+            missiles.splice(i, 1);
+            removeSprite(missile);
+            i -= 1;
+        }
+    }
+    // 省略...
+
+function fire() {
+  if (missiles.length < 3) {
+    let missile = createSprite(sprites.missile);
+    missile.x = player.x;
+    missile.y = player.y - player.height / 2;
+    missile.vy = -4;
+    missile.vx = 0;
+    missiles.push(missile);
+  }
+}
+
+function hitTest() {
+  // ミサイルとエイリアンのあたり判定
+  for (let i = 0; i < aliens.length; i++) {
+    for (let j = 0; j < missiles.length; j++) {
+      let alien = aliens[i];
+      let missile = missiles[j];
+      if (
+        Math.abs(missile.x - alien.x) < 16 &&
+        Math.abs(missile.y - alien.y) < 16
+      ) {
+        aliens.splice(i, 1);
+        removeSprite(alien);
+        i -= 1;
+        if (missile.kind === "missile") {
+          missiles.splice(j, 1);
+          removeSprite(missile);
+          j -= 1;
+        }
+        //　このalienは削除されたので、breakしてjのループを抜ける
+        break;
+      }
+    }
+  }
+    // 省略...
+```
+
 -----
 
 ## Step 13: Zキーで3-wayミサイルを発射できるようにしよう
 
+```js
+function setUp() {
+  // ...省略
+  let z_key = keyboard("z");
+  z_key.press = () => {
+    console.info("3-way!");
+    fire3way();
+  };
+  // 省略...
+
+function fire3way() {
+  if (missiles.length > 0) {
+    return;
+  }
+
+  for (let i = -2; i <= 2; i += 2) {
+    let missile = createSprite(sprites.missile);
+    missile.x = player.x;
+    missile.y = player.y - player.height / 2;
+    missile.vy = -4;
+    missile.vx = i;
+    missile.kind = "missile";
+    missiles.push(missile);
+  }
+}
+```
+
 -----
 
 ## Step 14: Xキーでレーザーを発射できるようにしよう
+
+```js
+```
 
 -----
 
