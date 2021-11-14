@@ -13,20 +13,17 @@ import {
 // グローバル変数
 let player;
 let aliens = [];
-let missiles = [];
-let alien_missiles = [];
 let frame = 0;
+let alienMissiles = [];
 let counter = 0;
 let gameover = false;
 let gameclear = false;
+let missiles = [];
 
 // 初期化
-init(setup, gameloop);
+init(setUp, gameLoop);
 
-// setupは最初に1回だけ呼ばれます
-// ここでキーボード入力受付の処理を登録します
-// 自機やエイリアンのセットアップも行います
-function setup() {
+function setUp() {
     // 自機のセットアップ
     player = createSprite(sprites.player);
 
@@ -43,18 +40,6 @@ function setup() {
     right.press = () => {
         player.vx = 4;
     };
-    space.press = () => {
-        console.log("fire!");
-        fire();
-    };
-    z_key.press = () => {
-        console.info("3-way!");
-        fire_3way();
-    };
-    x_key.press = () => {
-        console.info("laser!");
-        fire_laser();
-    };
     left.release = () => {
         if (player.vx === -4) {
             player.vx = 0;
@@ -65,20 +50,29 @@ function setup() {
             player.vx = 0;
         }
     };
+    space.press = () => {
+        console.log("fire!");
+        fire();
+    };
+    z_key.press = () => {
+        console.info("3-way!");
+        fire3way();
+    };
+    x_key.press = () => {
+        console.info("laser!");
+        fireLaser();
+    };
 
-    reset_game();
+    resetGame();
 }
 
-// ここで各種チェック、処理を行います
-// gameloop1秒間に60回呼ばれます
-function gameloop(delta) {
+function gameLoop() {
     frame++;
-    frame = frame % 8000000000; // frameが大きくなりすぎたら0に戻す
 
     if (gameover || gameclear) {
         counter++;
         if (counter > 180) {
-            reset_game();
+            resetGame();
             counter = 0;
             gameover = false;
             gameclear = false;
@@ -105,70 +99,22 @@ function gameloop(delta) {
     }
 
     // エイリアンのミサイルを動かす
-    for (let i = 0; i < alien_missiles.length; i++) {
-        let alien_missile = alien_missiles[i];
-        alien_missile.y += 2;
-        if (alien_missile.y > app.view.height + alien_missile.height / 2) {
-            alien_missiles.splice(i, 1);
-            removeSprite(alien_missile);
+    for (let i = 0; i < alienMissiles.length; i++) {
+        let alienMissile = alienMissiles[i];
+        alienMissile.y += 2;
+        if (alienMissile.y > app.view.height + alienMissile.height / 2) {
+            removeSprite(alienMissile);
+            alienMissiles.splice(i, 1);
             i -= 1;
         }
     }
 
     // エイリアンを動かす
-    move_aliens();
+    moveAliens();
     // エイリアンのミサイル発射
-    alien_fire();
+    alienFire();
     // hit test
     hitTest();
-}
-
-function reset_game() {
-    frame = 0;
-    player.vx = 0;
-
-    // ミサイルのリセット
-    for (let i = 0; i < missiles.length; i++) {
-        let missile = missiles[i];
-        removeSprite(missile);
-    }
-    missiles = [];
-
-    // エイリアンのミサイルのリセット
-    for (let i = 0; i < alien_missiles.length; i++) {
-        let alien_missile = alien_missiles[i];
-        removeSprite(alien_missile);
-    }
-    alien_missiles = [];
-
-    // エイリアンのリセット
-    for (let i = 0; i < aliens.length; i++) {
-        let alien = aliens[i];
-        removeSprite(alien);
-    }
-    aliens = [];
-
-    // 自機のセット
-    player.x = 160;
-    player.y = 220;
-    player.vx = 0;
-
-    // エイリアンのセットアップ
-    for (let j = 0; j < 3; j++) {
-        for (let i = 0; i < 5; i++) {
-            let alien;
-            if (j === 0) {
-                alien = createSprite(sprites.alien1);
-            } else if (j === 1) {
-                alien = createSprite(sprites.alien2);
-            } else {
-                alien = createSprite(sprites.alien3);
-            }
-            alien.x = 16 + i * 64;
-            alien.y = 20 + j * 32;
-            aliens.push(alien);
-        }
-    }
 }
 
 function fire() {
@@ -178,60 +124,7 @@ function fire() {
         missile.y = player.y - player.height / 2;
         missile.vy = -4;
         missile.vx = 0;
-        missile.kind = "missile";
         missiles.push(missile);
-    }
-}
-
-function fire_3way() {
-    if (missiles.length > 0) {
-        return;
-    }
-
-    for (let i = -2; i <= 2; i += 2) {
-        let missile = createSprite(sprites.missile);
-        missile.x = player.x;
-        missile.y = player.y - player.height / 2;
-        missile.vy = -4;
-        missile.vx = i;
-        missile.kind = "missile";
-        missiles.push(missile);
-    }
-}
-
-function fire_laser() {
-    if (missiles.length < 3) {
-        let missile = createSprite(sprites.laser);
-        missile.x = player.x;
-        missile.y = player.y - player.height / 2;
-        missile.vy = -4;
-        missile.vx = 0;
-        missile.kind = "laser";
-        missiles.push(missile);
-    }
-}
-
-function move_aliens() {
-    for (let i = 0; i < aliens.length; i++) {
-        let alien = aliens[i];
-        if (frame % 60 < 30) {
-            alien.x += 2;
-        } else {
-            alien.x -= 2;
-        }
-    }
-}
-
-function alien_fire() {
-    for (let i = 0; i < aliens.length; i++) {
-        let alien = aliens[i];
-        if (alien_missiles.length >= 3) return;
-        if (Math.random() < 0.007) {
-            let alien_missile = createSprite(sprites.alien_missile);
-            alien_missile.x = alien.x;
-            alien_missile.y = alien.y + alien.height / 2;
-            alien_missiles.push(alien_missile);
-        }
     }
 }
 
@@ -259,6 +152,7 @@ function hitTest() {
         }
     }
 
+    // 残りエイリアンのカウント
     if (aliens.length === 0) {
         gameclear = true;
         showMessage("Clear");
@@ -266,14 +160,103 @@ function hitTest() {
     }
 
     // エイリアンのミサイルと自機の当たり判定
-    for (let i = 0; i < alien_missiles.length; i++) {
-        let alien_missile = alien_missiles[i];
+    for (let i = 0; i < alienMissiles.length; i++) {
+        let alienMissile = alienMissiles[i];
         if (
-            Math.abs(alien_missile.x - player.x) < 16 &&
-            Math.abs(alien_missile.y - player.y) < 16
+            Math.abs(alienMissile.x - player.x) < 16 &&
+            Math.abs(alienMissile.y - player.y) < 16
         ) {
             gameover = true;
             showMessage("Game Over");
         }
+    }
+}
+
+function moveAliens() {
+    for (let i = 0; i < aliens.length; i++) {
+        let alien = aliens[i];
+        if (frame % 60 < 30) {
+            alien.x += 1;
+        } else {
+            alien.x -= 1;
+        }
+    }
+}
+
+function alienFire() {
+    for (let i = 0; i < aliens.length; i++) {
+        let alien = aliens[i];
+        if (alienMissiles.length >= 3) return;
+        if (Math.random() < 0.007) {
+            let alienMissile = createSprite(sprites.alienMissile);
+            alienMissile.x = alien.x;
+            alienMissile.y = alien.y + alien.height / 2;
+            alienMissiles.push(alienMissile);
+        }
+    }
+}
+
+function resetGame() {
+    // エイリアンのミサイルのリセット
+    for (let i = 0; i < alienMissiles.length; i++) {
+        let alienMissile = alienMissiles[i];
+        removeSprite(alienMissile);
+    }
+    alienMissiles = [];
+
+    // エイリアンのリセット
+    for (let i = 0; i < aliens.length; i++) {
+        let alien = aliens[i];
+        removeSprite(alien);
+    }
+    aliens = [];
+
+    // 自機のセット
+    player.vx = 0;
+    player.x = 160;
+    player.y = 220;
+
+    // エイリアンのセットアップ
+    for (let j = 0; j < 3; j++) {
+        for (let i = 0; i < 5; i++) {
+            let alien;
+            if (j === 0) {
+                alien = createSprite(sprites.alien1);
+            } else if (j === 1) {
+                alien = createSprite(sprites.alien2);
+            } else {
+                alien = createSprite(sprites.alien3);
+            }
+            alien.x = 16 + i * 64;
+            alien.y = 20 + j * 32;
+            aliens.push(alien);
+        }
+    }
+}
+
+function fire3way() {
+    if (missiles.length > 0) {
+        return;
+    }
+
+    for (let i = -2; i <= 2; i += 2) {
+        let missile = createSprite(sprites.missile);
+        missile.x = player.x;
+        missile.y = player.y - player.height / 2;
+        missile.vy = -4;
+        missile.vx = i;
+        missiles.push(missile);
+    }
+}
+
+function fireLaser() {
+    if (missiles.length < 3) {
+        let missile = createSprite(sprites.laser);
+        missile.x = player.x;
+        missile.y = player.y - player.height / 2;
+        missile.vy = -4;
+        missile.vx = 0;
+        missile.kind = "laser";
+        missiles.push(missile);
     }
 }
