@@ -336,7 +336,69 @@ function setup() {
 
 - Step 05ではStep 04で表示した自機をキーボードで動かします
 - キーボード入力は`util.js`内の`keyboard`を使用して取得します
-- TBD
+- まず、初回に1回だけ呼ばれる`setup`にて、キーボード入力に対する設定を行います
+  - キーボードの左矢印キーが押されたら、`left.press`イベントが発生します
+  - イベントが発生したら`player.vx`プロパティ（辞書のアイテム）を+4または-4に設定します
+- 1秒に60回呼ばれる`gameloop`にて、
+  - プレイヤーの横座標を示す`player.x`に`player.vx`を足します
+
+```js
+import "./styles.css";
+import { init, keyboard, sprites, createSprite } from "./util.js";
+
+// グローバル変数
+let player;
+
+// 初期化
+init(setup, gameloop);
+
+function setup() {
+  // 自機のセットアップ
+  player = createSprite(sprites.player);
+  player.vx = 0;
+  player.x = 160;
+  player.y = 220;
+
+  // キーボード入力受付
+  let left = keyboard("ArrowLeft");
+  let right = keyboard("ArrowRight");
+
+  left.press = () => {
+    player.vx = -4;
+  };
+  right.press = () => {
+    player.vx = 4;
+  };
+}
+
+function gameloop() {
+  // 自機を動かす
+  player.x += player.vx;
+}
+```
+
+- 実行してみましょう
+- 自機が左右に動きますが、矢印キーが押されていない時も止まりません
+- 矢印キーが離されたら止まるように、以下のコードを追加しましょう
+- 詳細は`step05.js`を参照してください
+- `if`や`===`を覚えていない場合は、Step 03を参照してください
+
+```js
+function setup() {
+// 省略...
+
+left.release = () => {
+    if (player.vx === -4) {
+      player.vx = 0;
+    }
+  };
+right.release = () => {
+    if (player.vx === 4) {
+      player.vx = 0;
+    }
+  };
+}
+```
 
 -----
 
