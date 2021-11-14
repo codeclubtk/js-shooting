@@ -607,8 +607,61 @@ function moveAliens() {
 ## Step 10: エイリアンもミサイルを打ってくるようにしよう
 
 - エイリアンもミサイルを打ってくるようにしよう
-  - すでに3発のミサイルがエイリアンから画面内に発射されていたらそれ以上は発射しないようにしよう
-  - Step09と同様に、`alien_missiles`を巡回中にその要素を削除してはいけないので、`alien_missiles[:]`（コピー）を巡回中に`alien_missiles`の要素を削除しよう
+- すでに3発のミサイルがエイリアンから画面内に発射されていたらそれ以上は発射しないようにしよう
+- 上記の実装のために、まずエイリアンのミサイルを保持するグローバル変数を定義し、カラに初期化しよう
+
+```js
+let alienMissiles = [];
+```
+
+- そして、ランダムに最大3発までエイリアンが撃ってくるよにしよう
+- `Math.random()`は0から1までの少数をランダムに返す関数です
+- ここでは0.7%の確率で、かつまだミサイルが3発撃たれていなかったらエイリアンがミサイルを撃つようにしています
+
+```js
+function gameLoop() {
+  // ...省略
+  // エイリアンのミサイル発射
+  alienFire();
+  // 省略...
+}
+
+function alienFire() {
+  for (let i = 0; i < aliens.length; i++) {
+    let alien = aliens[i];
+    if (alienMissiles.length >= 3) return;
+    if (Math.random() < 0.007) {
+      let alienMissile = createSprite(sprites.alienMissile);
+      alienMissile.x = alien.x;
+      alienMissile.y = alien.y + alien.height / 2;
+      alienMissiles.push(alienMissile);
+    }
+  }
+}
+```
+
+- 上記だけだと、ミサイルが発射された後動かないので、動かしましょう
+- もしミサイルが画面外に出たらさくじょしよう。`alienMissiles`を巡回中にその要素を削除するため、該当ミサイルが削除対象の場合、Step 09同様`splice`で項目を削除し、1つずれた`alienMissile`に対処するため`i`を-1して再度`for`ループさせます
+
+```js
+function gameLoop() {
+  // ...省略
+
+  // エイリアンのミサイルを動かす
+  for (let i = 0; i < alienMissiles.length; i++) {
+    let alienMissile = alienMissiles[i];
+    alienMissile.y += 2;
+    if (alienMissile.y > app.view.height + alienMissile.height / 2) {
+      removeSprite(alienMissile);
+      alienMissiles.splice(i, 1);
+      i -= 1;
+    }
+  }
+
+  // 省略...
+```
+
+- この段階ではエイリアンのミサイルに当たっても何も起こりません。次のステップで対応します
 
 -----
 
