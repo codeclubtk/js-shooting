@@ -667,9 +667,121 @@ function gameLoop() {
 
 ## Step 11: ゲームクリア/ゲームオーバー
 
-- エイリアンを全て倒したら`Clear`と表示しよう
 - エイリアンのミサイルに自機が当たったら`Game Over`と表示しよう
+- まず、このために`showMessage`関数がutil.js内に用意されていますので、importします
+- 同様に`hideMessage`もimportします
+
+```js
+import {
+  // ...省略
+  showMessage,
+  hideMessage
+} from "./util.js";
+```
+
+- エイリアンのミサイルに当たった場合には`gameover`グローバル変数をtrueにして`showMessage`を呼び出します
+- この`gameover`変数は後ほど使います
+- 同様に、すぐに後で使うので、`gameclear`と`counter`も追加します
+
+```js
+let counter = 0;
+let gameover = false;
+let gameclear = false;
+
+function hitTest() {
+  // ... 省略
+  // エイリアンのミサイルと自機の当たり判定
+  for (let i = 0; i < alienMissiles.length; i++) {
+    let alienMissile = alienMissiles[i];
+    if (
+      Math.abs(alienMissile.x - player.x) < 16 &&
+      Math.abs(alienMissile.y - player.y) < 16
+    ) {
+      gameover = true;
+      showMessage("Game Over");
+    }
+  }
+
+```
+
+- エイリアンを全て倒したら`Clear`と表示しよう
+
+```js
+function hitTest() {
+  // ...省略
+  // 残りエイリアンのカウント
+  if (aliens.length === 0) {
+    gameclear = true;
+    showMessage("Clear");
+    return;
+  }
+  // 省略...
+```
+
 - ゲームクリアもしくはゲームオーバーを3秒表示したら自動的にゲームを再開しよう
+- 再度初めからゲームを開始するために、一部の`setup`内の処理を`resetGame`関数に移動します
+- また、エイリアンのミサイルとエイリアンの初期化処理（リセット）を追加します
+
+```js
+function resetGame() {
+  // エイリアンのミサイルのリセット
+  for (let i = 0; i < alienMissiles.length; i++) {
+    let alienMissile = alienMissiles[i];
+    removeSprite(alienMissile);
+  }
+  alienMissiles = [];
+
+  // エイリアンのリセット
+  for (let i = 0; i < aliens.length; i++) {
+    let alien = aliens[i];
+    removeSprite(alien);
+  }
+  aliens = [];
+
+  // 自機のセット
+  player.vx = 0;
+  player.x = 160;
+  player.y = 220;
+
+  // エイリアンのセットアップ
+  for (let j = 0; j < 3; j++) {
+    for (let i = 0; i < 5; i++) {
+      let alien;
+      if (j === 0) {
+        alien = createSprite(sprites.alien1);
+      } else if (j === 1) {
+        alien = createSprite(sprites.alien2);
+      } else {
+        alien = createSprite(sprites.alien3);
+      }
+      alien.x = 16 + i * 64;
+      alien.y = 20 + j * 32;
+      aliens.push(alien);
+    }
+  }
+}
+
+function setUp() {
+  // ...省略
+  resetGame();
+}
+
+function gameLoop() {
+  frame++;
+
+  if (gameover || gameclear) {
+    counter++;
+    if (counter > 180) {
+      resetGame();
+      counter = 0;
+      gameover = false;
+      gameclear = false;
+      hideMessage();
+    }
+    return;
+  }
+  // 省略...
+```
 
 -----
 
