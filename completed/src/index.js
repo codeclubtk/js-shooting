@@ -120,7 +120,7 @@ function gameloop(delta) {
     // エイリアンのミサイル発射
     alien_fire();
     // hit test
-    hit_test();
+    hitTest();
 }
 
 function reset_game() {
@@ -235,7 +235,7 @@ function alien_fire() {
     }
 }
 
-function hit_test() {
+function hitTest() {
     // ミサイルとエイリアンのあたり判定
     for (let i = 0; i < aliens.length; i++) {
         for (let j = 0; j < missiles.length; j++) {

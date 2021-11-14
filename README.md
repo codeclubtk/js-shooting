@@ -60,11 +60,11 @@ import "./styles.css";
 import { init } from "./util.js";
 
 // 初期化
-init(setup, gameloop);
+init(setUp, gameLoop);
 
-function setup() {}
+function setUp() {}
 
-function gameloop() {}
+function gameLoop() {}
 ```
 
 - セーブするとブラウザの右側に黒い四角い背景が現れます
@@ -78,10 +78,10 @@ function gameloop() {}
 ## Step 02: キャラクターを表示してみよう
 
 - `index.js`の中を`step02.js`で置き換えて、alienを表示してみよう
-- Step 01からの変更点は、2行目の`import`と`setup`関数の中身です
+- Step 01からの変更点は、2行目の`import`と`setUp`関数の中身です
 - `import`は今回は気にしないでください
-- `setup`はプログラムを実行すると最初に1回だけ呼び出される関数です
-- `gameloop`はゲーム開始後`setup`が呼ばれた後に、1秒間に60回定期的に呼ばれる関数です
+- `setUp`はプログラムを実行すると最初に1回だけ呼び出される関数です
+- `gameLoop`はゲーム開始後`setUp`が呼ばれた後に、1秒間に60回定期的に呼ばれる関数です
 - `//`以降はコメント行で、自由なコメント（自分のメモ）を記述できます
 
 ```js
@@ -89,15 +89,15 @@ import "./styles.css";
 import { init, sprites, createSprite } from "./util.js";
 
 // 初期化
-init(setup, gameloop);
+init(setUp, gameLoop);
 
-function setup() {
+function setUp() {
   let alien = createSprite(sprites.alien1);
   alien.position.x = 16;
   alien.position.y = 16;
 }
 
-function gameloop() {}
+function gameLoop() {}
 ```
 
 - うまく行くとalien1が表示されます
@@ -116,7 +116,7 @@ function gameloop() {}
 ## Step 03: Java Scriptについて
 
 - Step 03では、Step 04以降ゲームを作っていく上で必要なJavascriptの基本について学びます
-- `index.js`の`setup`関数の中を全て消去し、以下のように`console.log`を追加して実行してみよう
+- `index.js`の`setUp`関数の中を全て消去し、以下のように`console.log`を追加して実行してみよう
 
   ```js
   // Step 03
@@ -269,7 +269,7 @@ function gameloop() {}
   - `myadd(a, b)`関数を作って、a+bを返そう
 
   ```js
-  // setup内にこれを書く
+  // setUp内にこれを書く
   let f1 = 10;
   let f2 = 20;
   let f3 = myadd(f1, f2);
@@ -303,18 +303,18 @@ function gameloop() {}
 
 - Step 03までで準備は完了です！ここからはゲームを作っていきましょう
 - まずは、`step04.js`の内容を`index.js`にコピーし、実行してみよう
-- `init(setup, gameloop);`を最初に1回だけ読んで、ゲームを初期化します
-  - `setup`は最初に1回だけ呼ばれます
-  - `gameloop`は1秒間に60回呼ばれます
-  - `gameloop`の中でキーボードの状態を取得し、ゲームの進行を行います
+- `init(setUp, gameLoop);`を最初に1回だけ読んで、ゲームを初期化します
+  - `setUp`は最初に1回だけ呼ばれます
+  - `gameLoop`は1秒間に60回呼ばれます
+  - `gameLoop`の中でキーボードの状態を取得し、ゲームの進行を行います
 - `player.png`を自機として表示してみよう
-  - `setup`内で自機を作成してみよう
+  - `setUp`内で自機を作成してみよう
   - 事前に`sprites.player`, `sprites.alien1`, `sprites.missile`などが用意されています
   - 何が用意されているかは`util.js`の中の`init`関数を見てみよう
   - `util.js`に用意されている`createSprite`関数にsprite.*を渡すと、新しくそのスプライトが作成されます
 
 ```js
-function setup() {
+function setUp() {
     // 自機のセットアップ
     let player = createSprite(sprites.player);
     player.x = 160;
@@ -336,13 +336,13 @@ function setup() {
 
 - Step 05ではStep 04で表示した自機をキーボードで動かします
 - キーボード入力は`util.js`内の`keyboard`を使用して取得します
-- まず、初回に1回だけ呼ばれる`setup`にて、キーボード入力に対する設定を行います
+- まず、初回に1回だけ呼ばれる`setUp`にて、キーボード入力に対する設定を行います
   - キーボードの左矢印キーが押されたら、`left.press`イベントが発生します
   - イベントが発生したら`player.vx`プロパティ（辞書のアイテム）を+4または-4に設定します
-- 1秒に60回呼ばれる`gameloop`にて、
+- 1秒に60回呼ばれる`gameLoop`にて、
   - プレイヤーの横座標を示す`player.x`に`player.vx`を足します
   - `vx`はx方向のvelocity（加速度）という意味です
-- `player`は`setup`関数で初期化されますが、`gameloop`関数でも使えなくてはなりません。そのため、`let global;`を一番外側において、どの関数でも使えるグローバル変数にします
+- `player`は`setUp`関数で初期化されますが、`gameLoop`関数でも使えなくてはなりません。そのため、`let global;`を一番外側において、どの関数でも使えるグローバル変数にします
 
 ```js
 import "./styles.css";
@@ -352,9 +352,9 @@ import { init, keyboard, sprites, createSprite } from "./util.js";
 let player;
 
 // 初期化
-init(setup, gameloop);
+init(setUp, gameLoop);
 
-function setup() {
+function setUp() {
   // 自機のセットアップ
   player = createSprite(sprites.player);
   player.vx = 0;
@@ -373,7 +373,7 @@ function setup() {
   };
 }
 
-function gameloop() {
+function gameLoop() {
   // 自機を動かす
   player.x += player.vx;
 }
@@ -386,7 +386,7 @@ function gameloop() {
 - `if`や`===`を覚えていない場合は、Step 03を参照してください
 
 ```js
-function setup() {
+function setUp() {
 // 省略...
 
 left.release = () => {
@@ -416,7 +416,7 @@ right.release = () => {
   console.log(app.view.width); // 320です
   ```
 
-- 上記を行うには、`gameloop`内に以下のように書くことができます
+- 上記を行うには、`gameLoop`内に以下のように書くことができます
   - `Math.max`を使って自機のX座標を現在の値と画面の左端のうち大きい方にする
   - `Math.min`を使って自機のX座標を現在の値と画面の右端のうち小さい方にする
 - 境界チェックのためのこの`Math.max/min`の使い方はよくでてきますので覚えておきましょう
@@ -432,7 +432,7 @@ right.release = () => {
 
 - ここまでで自機が移動できるようになりましたので、次にスペースキーでミサイルを1発だけ発射できるようにしよう
   - ミサイルが画面にないときはまたミサイルが発射でき、ミサイルが画面内にあるときは発射できないようにしよう
-  - ミサイルが発射されたら`missile`の位置を自機の位置あたりに設定し、`gameloop`内で位置を更新しよう
+  - ミサイルが発射されたら`missile`の位置を自機の位置あたりに設定し、`gameLoop`内で位置を更新しよう
   - ミサイルは画面の外に出たら消えるようにしよう
 - まず、ミサイルを保存するグローバル変数`missile`を作成し、`null`に初期化します。`null`は何もない値という意味です
 
@@ -440,7 +440,7 @@ right.release = () => {
 let missile = null;
 ```
 
-- そして、`setup`にスペースキーの処理を追加します。仕組みは`player`の動かし方と同じです
+- そして、`setUp`にスペースキーの処理を追加します。仕組みは`player`の動かし方と同じです
 - 今回、ミサイル発射時の処理は`player`の時よりちょっと長いため、`fire`という関数にします
 ```js
 let space = keyboard(" ");
@@ -473,7 +473,7 @@ import {
   removeSprite
 } from "./util.js";
 
-function gameloop() {
+function gameLoop() {
   // ... 省略
 
   // ミサイルを動かす
@@ -496,9 +496,72 @@ function gameloop() {
 ## Step 08: エイリアン（敵）を配置しよう
 
 - 配列にエイリアンを格納し、表示しよう
+- まず、複数のエイリアンを格納する`alians`というarray（配列）を作成します
+
+```js
+let aliens = [];
+```
+
+- そして、`setUp`関数内で3行5列=15匹のエイリアンのSpriteを作成し、作ったSpriteを`alians`のarrayにpush（追加）します
+- こうすることにより、`aliens`は15この要素を持つ配列になります
+
+```js
+// エイリアンのセットアップ
+for (let j = 0; j < 3; j++) {
+  for (let i = 0; i < 5; i++) {
+    let alien;
+    if (j === 0) {
+      alien = createSprite(sprites.alien1);
+    } else if (j === 1) {
+      alien = createSprite(sprites.alien2);
+    } else {
+      alien = createSprite(sprites.alien3);
+    }
+    alien.x = 16 + i * 64;
+    alien.y = 20 + j * 32;
+    aliens.push(alien);
+  }
+}
+```
+
 - ミサイルが当たったらエイリアンを消去しよう
-- ミサイルにあったかどうかの判定はミサイルとエイリアンのx, y座標の差の絶対値が32以下の場合としよう
-- ここまでのステップで少しゲームとして遊べるようになります。
+- ミサイルにあったかどうかの判定はミサイルとエイリアンのx, y座標の差の絶対値が16以下の場合としよう
+- ミサイルとエイリアンの当たり判定を`gameLoop`内で行います
+
+```js
+function gameLoop() {
+  // ... 省略
+  // hit test
+  hitTest();
+}
+
+
+function hitTest() {
+  // ミサイルとエイリアンのあたり判定
+  for (let i = 0; i < aliens.length; i++) {
+    let alien = aliens[i];
+    if (
+      missile !== null &&
+      Math.abs(missile.x - alien.x) < 16 &&
+      Math.abs(missile.y - alien.y) < 16
+    ) {
+      removeSprite(alien);
+      // spliceは, 第1引数で指定したi番目の要素から第1引数で指定した1個の要素を取り除くという意味
+      // aliens配列は、この操作の後aliens[0], aliens[1], ..., aliens[i-1], aliens[i+1], ...
+      // となる
+      // つまり、i番目の要素が取り除かれる
+      aliens.splice(i, 1);
+
+      removeSprite(missile);
+      missile = null;
+    }
+  }
+}
+```
+
+- ここまでで少しゲームとして遊べるようになります
+
+![エイリアンと自機](./images/step08-1.png)
 
 -----
 
