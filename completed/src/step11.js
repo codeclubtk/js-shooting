@@ -19,6 +19,9 @@ let alienMissiles = [];
 let counter = 0;
 let gameover = false;
 let gameclear = false;
+let left = keyboard("ArrowLeft");
+let right = keyboard("ArrowRight");
+let space = keyboard(" ");
 
 // 初期化
 init(setUp, gameLoop);
@@ -26,32 +29,6 @@ init(setUp, gameLoop);
 function setUp() {
     // 自機のセットアップ
     player = createSprite(sprites.player);
-
-    // キーボード入力受付
-    let left = keyboard("ArrowLeft");
-    let right = keyboard("ArrowRight");
-    let space = keyboard(" ");
-
-    left.press = () => {
-        player.vx = -4;
-    };
-    right.press = () => {
-        player.vx = 4;
-    };
-    left.release = () => {
-        if (player.vx === -4) {
-            player.vx = 0;
-        }
-    };
-    right.release = () => {
-        if (player.vx === 4) {
-            player.vx = 0;
-        }
-    };
-    space.press = () => {
-        console.log("fire!");
-        fire();
-    };
 
     resetGame();
 }
@@ -72,7 +49,17 @@ function gameLoop() {
     }
 
     // 自機を動かす
-    player.x += player.vx;
+    let vx = 0;
+    if (left.isDown) {
+        vx = -4;
+    } else if (right.isDown) {
+        vx = 4;
+    }
+    if (space.isDown) {
+        console.log("fire!");
+        fire();
+    }
+    player.x += vx;
     player.x = Math.max(player.x, player.width / 2);
     player.x = Math.min(player.x, app.view.width - sprites.player.width / 2);
 

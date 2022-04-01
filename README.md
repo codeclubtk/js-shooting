@@ -335,13 +335,12 @@ function setUp() {
 
 - Step 05ではStep 04で表示した自機をキーボードで動かします
 - キーボード入力は`util.js`内の`keyboard`を使用して取得します
-- まず、初回に1回だけ呼ばれる`setUp`にて、キーボード入力に対する設定を行います
-  - キーボードの左矢印キーが押されたら、`left.press`イベントが発生します
-  - イベントが発生したら`player.vx`プロパティ（辞書のアイテム）を+4または-4に設定します
+- まず、グローバル変数の定義のところで`left`と`right`を定義して、それぞれ左・右矢印キーに割り当てます
 - 1秒に60回呼ばれる`gameLoop`にて、
-  - プレイヤーの横座標を示す`player.x`に`player.vx`を足します
+  - キーボードの左矢印キーが押されたら`vx=-4`、右矢印キーが押されたら`vx=4`、それ以外は`vx=0`とします
+  - プレイヤーの横座標を示す`player.x`に`vx`を足します
   - `vx`はx方向のvelocity（加速度）という意味です
-- `player`は`setUp`関数で初期化されますが、`gameLoop`関数でも使えなくてはなりません。そのため、`let global;`を一番外側において、どの関数でも使えるグローバル変数にします
+- `player`は`setUp`関数で初期化されますが、`gameLoop`関数でも使えなくてはなりません。そのため、`let player;`を一番外側において、どの関数でも使えるグローバル変数にします
 
 ```js
 import "./styles.css";
@@ -349,6 +348,8 @@ import { init, keyboard, sprites, createSprite } from "./util.js";
 
 // グローバル変数
 let player;
+let left = keyboard("ArrowLeft");
+let right = keyboard("ArrowRight");
 
 // 初期化
 init(setUp, gameLoop);
@@ -359,47 +360,21 @@ function setUp() {
   player.vx = 0;
   player.x = 160;
   player.y = 220;
-
-  // キーボード入力受付
-  let left = keyboard("ArrowLeft");
-  let right = keyboard("ArrowRight");
-
-  left.press = () => {
-    player.vx = -4;
-  };
-  right.press = () => {
-    player.vx = 4;
-  };
 }
 
 function gameLoop() {
   // 自機を動かす
-  player.x += player.vx;
+  let vx = 0;
+  if (left.isDown) {
+    vx = -4;
+  } else if (right.isDown) {
+    vx = 4;
+  }
+  player.x += vx;
 }
 ```
 
 - 実行してみましょう
-- 自機が左右に動きますが、矢印キーが押されていない時も止まりません
-- 矢印キーが離されたら止まるように、以下のコードを追加しましょう
-- 詳細は`step05.js`を参照してください
-- `if`や`===`を覚えていない場合は、Step 03を参照してください
-
-```js
-function setUp() {
-// 省略...
-
-left.release = () => {
-    if (player.vx === -4) {
-      player.vx = 0;
-    }
-  };
-right.release = () => {
-    if (player.vx === 4) {
-      player.vx = 0;
-    }
-  };
-}
-```
 
 -----
 
@@ -443,14 +418,19 @@ let missile = null;
 - 今回、ミサイル発射時の処理は`player`の時よりちょっと長いため、`fire`という関数にします
 
 ```js
+// グローバル変数
 let space = keyboard(" ");
-space.press = () => {
-  console.log("fire!");
-  fire();
-};
+
+function gameLoop() {
+...
+  if (space.isDown) {
+    console.log("fire!");
+    fire();
+  }
+  ...
 ```
 
-- `fire`関数で、`missile`がnullの時だけミサイルを作成し、初期位置を設定します。こうすることにより、ミサイルが何発も同時に発射っされることを防ぎます
+- `fire`関数で、`missile`がnullの時だけミサイルを作成し、初期位置を設定します。こうすることにより、ミサイルが何発も同時に発射されることを防ぎます
 
 ```js
 function fire() {
@@ -788,6 +768,7 @@ function gameLoop() {
 ## Step 12: ミサイルを画面内3発まで発射できるようにしよう
 
 - 配列を使用してミサイルを画面内3発まで発射できるようにしよう
+- missile.kindを"missile"にします（Step 14でLaserと区別するために使います）
 
 ```js
 let missiles = [];
@@ -814,6 +795,7 @@ function fire() {
     missile.y = player.y - player.height / 2;
     missile.vy = -4;
     missile.vx = 0;
+    missile.kind = "missile";
     missiles.push(missile);
   }
 }
@@ -842,19 +824,49 @@ function hitTest() {
     // 省略...
 ```
 
+- ただし、このままでは連続して3発、短い間に発射されてしまうので、20/60秒(0.33秒）間は次のミサイルが発射されないように工夫しよう
+
+```js
+// グローバル変数
+let readyToFire = 0;
+
+function gameLoop() {
+  ...
+  if (readyToFire === 0 && space.isDown) {
+    readyToFire = 20;
+    console.log("fire!");
+    fire();
+  } else {
+    readyToFire = Math.max(0, readyToFire - 1);
+  }
+  ...
+}
+```
+
 -----
 
 ## Step 13: Zキーで3-wayミサイルを発射できるようにしよう
 
 ```js
-function setUp() {
-  // ...省略
-  let z_key = keyboard("z");
-  z_key.press = () => {
-    console.info("3-way!");
+// グローバル変数
+let z_key = keyboard("z");
+
+function gameLoop() {
+  ...
+  if (readyToFire === 0 && space.isDown) {
+    readyToFire = 20;
+    console.log("fire!");
+    fire();
+  } else if (readyToFire === 0 && z_key.isDown) {
+    readyToFire = 20;
+    console.log("3-way!");
     fire3way();
-  };
-  // 省略...
+  } else {
+    readyToFire = Math.max(0, readyToFire - 1);
+  }
+  ...
+
+// 省略...
 
 function fire3way() {
   if (missiles.length > 0) {
@@ -867,6 +879,7 @@ function fire3way() {
     missile.y = player.y - player.height / 2;
     missile.vy = -4;
     missile.vx = i;
+    missile.kind = "missile";
     missiles.push(missile);
   }
 }
@@ -878,13 +891,7 @@ function fire3way() {
 
 ## Step 14: Xキーでレーザーを発射できるようにしよう
 
-- まず今までのStepで作成した`fire`と`fire3way1`に`missile.kind`を追加します
-
-```js
-    missile.kind = "missile";
-```
-
-- そして、`fireLaser`にはmissile.kindを"laser"にします
+- `fireLaser`にはmissile.kindを"laser"にします
 - これによりエイリアンとミサイルの当たり判定の時にLaserはミサイルを消去しないようにできます
 
 ```js
@@ -900,13 +907,14 @@ function fireLaser() {
   }
 }
 
-function setUp() {
-  // ...省略
-  let x_key = keyboard("x");
-  x_key.press = () => {
-    console.info("laser!");
+function gameLoop() {
+  ...
+  } else if (readyToFire === 0 && x_key.isDown) {
+    readyToFire = 20;
+    console.log("laser!");
     fireLaser();
-  };
+  } else {
+
 ```
 
 - そして、missile.kindが"missile"の時だけミサイルを消滅させるようにします
